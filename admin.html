@@ -1,0 +1,1419 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manyeo Studio - Works Management CMS</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/meta/favicon-32x32.png">
+  <style>
+    :root {
+      --bg: #0b0d10;
+      --surface: #14171d;
+      --surface-hover: #1b1f27;
+      --border: #222733;
+      --border-focus: #3b4255;
+      --text: #f0f2f7;
+      --text-muted: #8b92a5;
+      --accent-blue: #1a2ffb;
+      --accent-blue-hover: #2e43ff;
+      --accent-lime: #c1ff00;
+      --danger: #ff4757;
+      --danger-hover: #ff6b81;
+      --warning: #ffa502;
+      --success: #2ed573;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      line-height: 1.5;
+    }
+
+    /* Top Navbar */
+    .top-nav {
+      background: rgba(20, 23, 29, 0.95);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      padding: 14px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .brand-wrap {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      text-transform: uppercase;
+      color: #fff;
+    }
+
+    .brand-badge {
+      font-size: 0.7rem;
+      background: rgba(26, 47, 251, 0.2);
+      border: 1px solid rgba(26, 47, 251, 0.4);
+      color: #798bff;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+    }
+
+    .status-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-family: var(--font-mono);
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--warning);
+      box-shadow: 0 0 8px currentColor;
+    }
+    .status-dot.online { background: var(--accent-lime); color: var(--accent-lime); }
+    .status-dot.local { background: var(--warning); color: var(--warning); }
+    .status-dot.offline { background: var(--danger); color: var(--danger); }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+      border: 1px solid transparent;
+      text-decoration: none;
+    }
+
+    .btn-secondary {
+      background: var(--surface);
+      border-color: var(--border);
+      color: var(--text);
+    }
+    .btn-secondary:hover {
+      background: var(--surface-hover);
+      border-color: var(--border-focus);
+    }
+
+    .btn-primary {
+      background: var(--accent-blue);
+      color: #fff;
+    }
+    .btn-primary:hover {
+      background: var(--accent-blue-hover);
+      box-shadow: 0 0 16px rgba(26, 47, 251, 0.4);
+    }
+
+    .btn-lime {
+      background: var(--accent-lime);
+      color: #0b0d10;
+      font-weight: 700;
+    }
+    .btn-lime:hover {
+      background: #d4ff33;
+      box-shadow: 0 0 16px rgba(193, 255, 0, 0.4);
+    }
+
+    .btn-danger {
+      background: rgba(255, 71, 87, 0.15);
+      border-color: rgba(255, 71, 87, 0.3);
+      color: var(--danger);
+    }
+    .btn-danger:hover {
+      background: var(--danger);
+      color: #fff;
+    }
+
+    /* Main Container */
+    .main-container {
+      max-width: 1360px;
+      margin: 0 auto;
+      padding: 32px 24px;
+      width: 100%;
+      flex: 1;
+    }
+
+    /* Stats Overview */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .stat-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .stat-value {
+      font-size: 1.85rem;
+      font-weight: 700;
+      color: #fff;
+      font-family: var(--font-mono);
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+    }
+
+    .stat-desc {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    /* Notice Banner */
+    .banner-box {
+      background: linear-gradient(135deg, rgba(26, 47, 251, 0.12), rgba(193, 255, 0, 0.05));
+      border: 1px solid rgba(26, 47, 251, 0.25);
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin-bottom: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .banner-text h4 {
+      font-size: 0.95rem;
+      margin-bottom: 4px;
+      color: #fff;
+    }
+    .banner-text p {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+
+    /* Controls Bar */
+    .controls-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .search-box {
+      position: relative;
+      flex: 1;
+      min-width: 260px;
+      max-width: 420px;
+    }
+
+    .search-input {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 14px 10px 38px;
+      color: var(--text);
+      font-size: 0.88rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .search-input:focus {
+      border-color: var(--accent-blue);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+
+    .filter-tags {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .tag-chip {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.2s;
+    }
+    .tag-chip:hover, .tag-chip.active {
+      background: var(--surface-hover);
+      border-color: var(--accent-blue);
+      color: #fff;
+    }
+
+    /* Table & Card List */
+    .table-container {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.88rem;
+    }
+
+    th {
+      background: rgba(255, 255, 255, 0.02);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 18px;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    td {
+      padding: 14px 18px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      vertical-align: middle;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .col-order {
+      width: 60px;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+    }
+
+    .col-thumb {
+      width: 80px;
+    }
+
+    .thumb-preview {
+      width: 64px;
+      height: 44px;
+      border-radius: 6px;
+      object-fit: cover;
+      background: #000;
+      border: 1px solid var(--border);
+      display: block;
+    }
+
+    .col-title {
+      font-weight: 600;
+      color: #fff;
+    }
+    .item-id {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+      margin-top: 2px;
+    }
+
+    .col-tags {
+      max-width: 320px;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+    }
+
+    .col-colors {
+      width: 140px;
+    }
+
+    .color-swatch-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .swatch-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      font-family: var(--font-mono);
+      border: 1px solid var(--border);
+    }
+
+    .swatch-circle {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .col-actions {
+      width: 140px;
+      text-align: right;
+    }
+
+    .action-btn-group {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    .icon-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .icon-btn:hover {
+      background: var(--surface-hover);
+      color: #fff;
+      border-color: var(--border-focus);
+    }
+    .icon-btn.btn-delete:hover {
+      background: rgba(255, 71, 87, 0.2);
+      border-color: var(--danger);
+      color: var(--danger);
+    }
+
+    /* Modal Styling */
+    .modal-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 20px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+    .modal-backdrop.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      width: 100%;
+      max-width: 620px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+      transform: translateY(20px);
+      transition: transform 0.25s ease;
+    }
+    .modal-backdrop.open .modal-card {
+      transform: translateY(0);
+    }
+
+    .modal-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .modal-header h3 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 4px;
+      font-size: 1.3rem;
+      line-height: 1;
+    }
+    .modal-close:hover { color: #fff; }
+
+    .modal-body {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .form-input {
+      background: #0d0f14;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: #fff;
+      font-size: 0.88rem;
+      outline: none;
+      font-family: inherit;
+    }
+    .form-input:focus {
+      border-color: var(--accent-blue);
+    }
+
+    .form-grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .color-input-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #0d0f14;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 6px 12px;
+    }
+    .color-picker {
+      width: 28px;
+      height: 28px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      background: transparent;
+    }
+
+    .modal-footer {
+      padding: 18px 24px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 12px;
+      background: rgba(0, 0, 0, 0.15);
+    }
+
+    /* Toast Container */
+    #toast-box {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 2000;
+      pointer-events: none;
+    }
+
+    .toast {
+      background: rgba(20, 23, 29, 0.95);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border);
+      color: #fff;
+      padding: 12px 18px;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      animation: slideIn 0.25s ease;
+      pointer-events: auto;
+    }
+    .toast.success { border-left: 4px solid var(--accent-lime); }
+    .toast.error { border-left: 4px solid var(--danger); }
+    .toast.info { border-left: 4px solid var(--accent-blue); }
+
+    @keyframes slideIn {
+      from { transform: translateX(30px); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    @media (max-width: 860px) {
+      .col-tags, .col-colors { display: none; }
+      .form-grid-2 { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navbar -->
+  <header class="top-nav">
+    <div class="brand-wrap">
+      <h1 class="brand-title">Manyeo Studio</h1>
+      <span class="brand-badge">CMS / ADMIN</span>
+      <div class="status-pill" id="nav-status-pill">
+        <span class="status-dot" id="nav-status-dot"></span>
+        <span id="nav-status-text">Checking Database...</span>
+      </div>
+    </div>
+    <div class="nav-actions">
+      <a href="/work" target="_blank" class="btn btn-secondary">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+        View Live Works
+      </a>
+      <button class="btn btn-secondary" onclick="openSupabaseConfigModal()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+        Database Settings
+      </button>
+      <button class="btn btn-lime" onclick="openCreateModal()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        + Add New Project
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="main-container">
+    <!-- Stats Grid -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <span class="stat-label">Total Works</span>
+        <div class="stat-value" id="stat-total-count">0</div>
+        <span class="stat-desc">Published portfolio items</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Database Status</span>
+        <div class="stat-value" id="stat-db-status" style="font-size: 1.3rem;">Connecting...</div>
+        <span class="stat-desc" id="stat-db-desc">Supabase Cloud REST API</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Storage Backend</span>
+        <div class="stat-value" id="stat-backend-type" style="font-size: 1.3rem;">Supabase / Local</div>
+        <span class="stat-desc" id="stat-latency">Latency: -- ms</span>
+      </div>
+    </div>
+
+    <!-- Vercel & Supabase Sync Notice Banner -->
+    <div class="banner-box">
+      <div class="banner-text">
+        <h4 id="banner-title">⚡ Supabase Direct Sync Ready</h4>
+        <p id="banner-desc">Changes made here automatically update your live Works page. Click "Sync Seed to Supabase" if initializing a fresh database.</p>
+      </div>
+      <div style="display:flex; gap:10px;">
+        <button class="btn btn-secondary" onclick="syncAllToSupabase()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+          Sync Seed to Supabase
+        </button>
+        <button class="btn btn-primary" onclick="loadWorks()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+          Refresh Data
+        </button>
+      </div>
+    </div>
+
+    <!-- Search & Filters -->
+    <div class="controls-bar">
+      <div class="search-box">
+        <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <input type="text" class="search-input" id="search-input" placeholder="Search projects by title, tag, or slug..." oninput="handleSearch(this.value)">
+      </div>
+      <div class="filter-tags" id="filter-tag-container">
+        <button class="tag-chip active" onclick="setFilterTag('')">All</button>
+        <button class="tag-chip" onclick="setFilterTag('3d')">3D</button>
+        <button class="tag-chip" onclick="setFilterTag('web')">Web</button>
+        <button class="tag-chip" onclick="setFilterTag('design')">Design</button>
+        <button class="tag-chip" onclick="setFilterTag('animation')">Animation</button>
+        <button class="tag-chip" onclick="setFilterTag('concept')">Concept</button>
+      </div>
+    </div>
+
+    <!-- Works Table -->
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th class="col-order">#</th>
+            <th class="col-thumb">Image</th>
+            <th>Project Details</th>
+            <th class="col-tags">Categories / Tags</th>
+            <th class="col-colors">Colors</th>
+            <th class="col-actions">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="works-table-body">
+          <tr>
+            <td colspan="6" style="text-align: center; padding: 40px; color: var(--text-muted);">
+              Loading projects from database...
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <!-- Work Edit / Create Modal -->
+  <div class="modal-backdrop" id="work-modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="modal-work-title">Edit Project</h3>
+        <button class="modal-close" onclick="closeWorkModal()">&times;</button>
+      </div>
+      <form id="work-form" onsubmit="handleSaveWork(event)">
+        <div class="modal-body">
+          <input type="hidden" id="work-id">
+          
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label class="form-label">Project Title</label>
+              <input type="text" class="form-input" id="work-title" required placeholder="e.g. Oryzo AI">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Slug / ID</label>
+              <input type="text" class="form-input" id="work-slug" required placeholder="e.g. oryzo_ai">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Tags / Categories (bullet separated)</label>
+            <input type="text" class="form-input" id="work-tags" placeholder="concept • web • design • 3d • animation">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Thumbnail Image URL</label>
+            <input type="text" class="form-input" id="work-image" placeholder="/assets/projects/oryzo_ai/home.webp">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Depth Map Image URL (for 3D effect)</label>
+            <input type="text" class="form-input" id="work-depth" placeholder="/assets/projects/oryzo_ai/home_depth.webp">
+          </div>
+
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label class="form-label">Background Color</label>
+              <div class="color-input-wrap">
+                <input type="color" class="color-picker" id="work-color-bg-picker" oninput="document.getElementById('work-color-bg').value = this.value">
+                <input type="text" class="form-input" id="work-color-bg" value="#1a1411" oninput="document.getElementById('work-color-bg-picker').value = this.value">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Text Color</label>
+              <div class="color-input-wrap">
+                <input type="color" class="color-picker" id="work-color-text-picker" oninput="document.getElementById('work-color-text').value = this.value">
+                <input type="text" class="form-input" id="work-color-text" value="#ffffff" oninput="document.getElementById('work-color-text-picker').value = this.value">
+              </div>
+            </div>
+          </div>
+
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label class="form-label">Detail Page URL (href)</label>
+              <input type="text" class="form-input" id="work-href" placeholder="/projects/oryzo_ai">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Sort Order</label>
+              <input type="number" class="form-input" id="work-sort-order" value="1">
+            </div>
+          </div>
+
+          <!-- Inside Detail Page Content -->
+          <div style="border-top: 1px solid rgba(255,255,255,0.1); margin: 24px 0 16px; padding-top: 18px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+              <h4 style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--accent); font-weight: 700;">
+                Inside Detail Page Customization (상세 페이지 안쪽 내용)
+              </h4>
+              <span style="font-size: 0.72rem; color: var(--text-muted); background: rgba(255,255,255,0.06); padding: 2px 8px; border-radius: 9999px;">Optional</span>
+            </div>
+            <p style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 16px; line-height: 1.5;">
+              작품 카드를 클릭했을 때 열리는 안쪽 상세 페이지의 스토리 글, 갤러리 사진, 외부 링크를 설정합니다. 비워두시면 스튜디오 기본 템플릿으로 우아하게 채워집니다.
+            </p>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Project Story / Description (안쪽 상세 설명글)</label>
+            <textarea class="form-input" id="work-description" rows="3" placeholder="작품 기획 의도 및 배경 스토리를 적어주세요. (비워둘 시 스튜디오 기본 글이 적용됩니다)"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Inside Gallery Visuals (안쪽 갤러리 이미지 URL, 줄바꿈으로 여러 장 입력)</label>
+            <textarea class="form-input" id="work-gallery" rows="3" placeholder="https://images.unsplash.com/...&#10;/assets/projects/oryzo_ai/home.webp&#10;(비워둘 시 메인 썸네일 이미지가 기본 갤러리로 채워집니다)"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Live Project / Launch URL (LAUNCH PROJECT 버튼 외부 링크)</label>
+            <input type="url" class="form-input" id="work-live-url" placeholder="https://your-client-site.com (선택사항, 입력 시 새 창으로 이동)">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeWorkModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="btn-save-work">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Supabase Config Modal -->
+  <div class="modal-backdrop" id="supabase-modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Supabase API Settings</h3>
+        <button class="modal-close" onclick="closeSupabaseModal()">&times;</button>
+      </div>
+      <form id="supabase-form" onsubmit="handleSaveSupabase(event)">
+        <div class="modal-body">
+          <p style="font-size:0.85rem; color:var(--text-muted); line-height: 1.6;">
+            Connect your Supabase project REST API to persist all portfolio changes in the cloud.
+            <br>
+            <strong style="color:var(--accent-lime);">Vercel Tip:</strong> If deployed on Vercel, set <code style="color:#798bff;">SUPABASE_URL</code> and <code style="color:#798bff;">SUPABASE_ANON_KEY</code> in Vercel Environment Variables and they will connect automatically!
+          </p>
+
+          <div class="form-group">
+            <label class="form-label">Supabase Project URL</label>
+            <input type="url" class="form-input" id="cfg-url" placeholder="https://xyzcompany.supabase.co" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Supabase Anon Key (public)</label>
+            <input type="password" class="form-input" id="cfg-key" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." required>
+          </div>
+
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <button type="button" class="btn btn-secondary" onclick="testCurrentConfig()">
+              ⚡ Test Connection
+            </button>
+            <span id="test-result-badge" style="font-size:0.8rem; font-family:var(--font-mono);"></span>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeSupabaseModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save & Apply</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toast-box"></div>
+
+  <script>
+    // --- State & Keys ---
+    const STORAGE_KEYS = {
+      URL: 'manyeo_supabase_url',
+      KEY: 'manyeo_supabase_anon_key',
+      DATA: 'manyeo_local_works_data'
+    };
+
+    let state = {
+      supabaseUrl: localStorage.getItem(STORAGE_KEYS.URL) || 'https://kxlmdxvmcicbgengytoo.supabase.co',
+      supabaseKey: localStorage.getItem(STORAGE_KEYS.KEY) || 'sb_publishable_G_qnPRoc5FAomnq6vVKIGA_bKZx6q1V',
+      works: [],
+      filteredWorks: [],
+      isConnected: false,
+      activeTag: '',
+      searchTerm: '',
+      latency: null
+    };
+
+    // --- Toast Notifications ---
+    function showToast(message, type = 'info') {
+      const box = document.getElementById('toast-box');
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.textContent = message;
+      box.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(10px)';
+        toast.style.transition = 'all 0.3s ease';
+        setTimeout(() => toast.remove(), 300);
+      }, 3500);
+    }
+
+    // --- Supabase REST Client ---
+    function getHeaders() {
+      return {
+        apikey: state.supabaseKey,
+        Authorization: `Bearer ${state.supabaseKey}`,
+        'Content-Type': 'application/json',
+        Prefer: 'return=representation'
+      };
+    }
+
+    async function testConnection(url, key) {
+      const cleanUrl = (url || '').replace(/\/+$/, '');
+      if (!cleanUrl || !key) return { ok: false, message: 'URL and Anon Key required' };
+      try {
+        const t0 = performance.now();
+        const res = await fetch(`${cleanUrl}/rest/v1/works?select=id&limit=1`, {
+          method: 'GET',
+          headers: { apikey: key, Authorization: `Bearer ${key}` }
+        });
+        const latency = Math.round(performance.now() - t0);
+        return { ok: res.ok, latency, status: res.status };
+      } catch (err) {
+        return { ok: false, message: err.message };
+      }
+    }
+
+    async function loadWorks() {
+      // 1. Try Vercel auto-config if credentials missing
+      if (!state.supabaseUrl || !state.supabaseKey) {
+        try {
+          const cfgRes = await fetch('/api/config');
+          if (cfgRes.ok) {
+            const cfg = await cfgRes.json();
+            if (cfg.supabaseUrl && cfg.supabaseKey) {
+              state.supabaseUrl = cfg.supabaseUrl;
+              state.supabaseKey = cfg.supabaseKey;
+              localStorage.setItem(STORAGE_KEYS.URL, cfg.supabaseUrl);
+              localStorage.setItem(STORAGE_KEYS.KEY, cfg.supabaseKey);
+              showToast('Vercel 환경 변수에서 Supabase 설정을 자동으로 불러왔습니다.', 'success');
+            }
+          }
+        } catch (e) {}
+      }
+
+      // 2. Test Supabase connection
+      if (state.supabaseUrl && state.supabaseKey) {
+        const test = await testConnection(state.supabaseUrl, state.supabaseKey);
+        state.isConnected = test.ok;
+        state.latency = test.latency;
+      } else {
+        state.isConnected = false;
+      }
+
+      updateStatusUI();
+
+      // 3. Fetch from Supabase or LocalStorage
+      if (state.isConnected) {
+        try {
+          const cleanUrl = state.supabaseUrl.replace(/\/+$/, '');
+          const res = await fetch(`${cleanUrl}/rest/v1/works?select=*&order=sort_order.asc`, {
+            headers: getHeaders()
+          });
+          if (res.ok) {
+            const data = await res.json();
+            state.works = data;
+            localStorage.setItem(STORAGE_KEYS.DATA, JSON.stringify(data));
+          } else {
+            throw new Error(`HTTP ${res.status}`);
+          }
+        } catch (e) {
+          console.warn('Supabase fetch failed, fallback to local', e);
+          loadLocalData();
+        }
+      } else {
+        loadLocalData();
+      }
+
+      applyFilters();
+      renderTable();
+    }
+
+    function loadLocalData() {
+      const saved = localStorage.getItem(STORAGE_KEYS.DATA);
+      if (saved) {
+        try {
+          state.works = JSON.parse(saved);
+        } catch (e) {
+          state.works = [];
+        }
+      }
+    }
+
+    // --- UI Update & Rendering ---
+    function updateStatusUI() {
+      const dot = document.getElementById('nav-status-dot');
+      const text = document.getElementById('nav-status-text');
+      const statDb = document.getElementById('stat-db-status');
+      const statDesc = document.getElementById('stat-db-desc');
+      const statBackend = document.getElementById('stat-backend-type');
+      const statLatency = document.getElementById('stat-latency');
+
+      if (state.isConnected) {
+        dot.className = 'status-dot online';
+        text.textContent = `Supabase Connected (${state.latency}ms)`;
+        statDb.textContent = 'ONLINE';
+        statDb.style.color = 'var(--accent-lime)';
+        statDesc.textContent = `PostgREST Cloud (${state.latency}ms)`;
+        statBackend.textContent = 'Supabase Cloud';
+        statLatency.textContent = `Response Time: ${state.latency} ms`;
+      } else if (state.supabaseUrl) {
+        dot.className = 'status-dot offline';
+        text.textContent = 'Supabase Offline (Local Fallback)';
+        statDb.textContent = 'OFFLINE';
+        statDb.style.color = 'var(--danger)';
+        statDesc.textContent = 'Failed to reach REST endpoint';
+        statBackend.textContent = 'LocalStorage Only';
+        statLatency.textContent = 'Offline fallback active';
+      } else {
+        dot.className = 'status-dot local';
+        text.textContent = 'Local Mode (No Supabase Key)';
+        statDb.textContent = 'LOCAL ONLY';
+        statDb.style.color = 'var(--warning)';
+        statDesc.textContent = 'Using browser storage';
+        statBackend.textContent = 'LocalStorage Mode';
+        statLatency.textContent = 'Set API Keys to sync';
+      }
+
+      document.getElementById('stat-total-count').textContent = state.works.length;
+    }
+
+    function applyFilters() {
+      let list = state.works.slice();
+
+      if (state.searchTerm) {
+        const q = state.searchTerm.toLowerCase();
+        list = list.filter(w =>
+          (w.title && w.title.toLowerCase().includes(q)) ||
+          (w.tags && w.tags.toLowerCase().includes(q)) ||
+          (w.slug && w.slug.toLowerCase().includes(q))
+        );
+      }
+
+      if (state.activeTag) {
+        const t = state.activeTag.toLowerCase();
+        list = list.filter(w => w.tags && w.tags.toLowerCase().includes(t));
+      }
+
+      list.sort((a, b) => (a.sort_order || 999) - (b.sort_order || 999));
+      state.filteredWorks = list;
+    }
+
+    function renderTable() {
+      const tbody = document.getElementById('works-table-body');
+      document.getElementById('stat-total-count').textContent = state.works.length;
+
+      if (!state.filteredWorks || state.filteredWorks.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="6" style="text-align: center; padding: 48px; color: var(--text-muted);">
+              No projects found matching the filter criteria.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = state.filteredWorks.map((w, idx) => {
+        const thumbSrc = w.image_url || '/assets/projects/oryzo_ai/home.webp';
+        const bg = w.color_bg || '#111';
+        const fg = w.color_text || '#fff';
+
+        return `
+          <tr>
+            <td class="col-order">${w.sort_order || (idx + 1)}</td>
+            <td class="col-thumb">
+              <img src="${thumbSrc}" class="thumb-preview" alt="${w.title}" onerror="this.style.opacity=0.3">
+            </td>
+            <td>
+              <div class="col-title">${escapeHtml(w.title || 'Untitled')}</div>
+              <div class="item-id">${escapeHtml(w.slug || w.id)}</div>
+            </td>
+            <td class="col-tags">${escapeHtml(w.tags || '—')}</td>
+            <td class="col-colors">
+              <div class="color-swatch-group">
+                <span class="swatch-pill" title="Background Color" style="background:${bg}; color:${fg}">
+                  <span class="swatch-circle" style="background:${bg}"></span>
+                  ${bg}
+                </span>
+              </div>
+            </td>
+            <td class="col-actions">
+              <div class="action-btn-group">
+                <a href="${w.href || '/projects/' + w.slug}" target="_blank" class="icon-btn" title="View Project Live">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                </a>
+                <button class="icon-btn" onclick="openEditModal('${w.id}')" title="Edit Project">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                </button>
+                <button class="icon-btn btn-delete" onclick="handleDeleteWork('${w.id}', '${escapeHtml(w.title)}')" title="Delete Project">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str).replace(/[&<>"']/g, m => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      }[m]));
+    }
+
+    // --- Search & Filter Handlers ---
+    function handleSearch(val) {
+      state.searchTerm = val.trim();
+      applyFilters();
+      renderTable();
+    }
+
+    function setFilterTag(tag) {
+      state.activeTag = tag;
+      document.querySelectorAll('.tag-chip').forEach(el => {
+        if (el.textContent.trim().toLowerCase() === (tag || 'all').toLowerCase()) {
+          el.classList.add('active');
+        } else {
+          el.classList.remove('active');
+        }
+      });
+      applyFilters();
+      renderTable();
+    }
+
+    // --- Modals & CRUD Actions ---
+    function openCreateModal() {
+      document.getElementById('modal-work-title').textContent = 'Add New Project';
+      document.getElementById('work-id').value = '';
+      document.getElementById('work-title').value = '';
+      document.getElementById('work-slug').value = '';
+      document.getElementById('work-tags').value = 'concept • web • design • development • 3d';
+      document.getElementById('work-image').value = '/assets/projects/oryzo_ai/home.webp';
+      document.getElementById('work-depth').value = '/assets/projects/oryzo_ai/home_depth.webp';
+      document.getElementById('work-color-bg').value = '#1a1411';
+      document.getElementById('work-color-bg-picker').value = '#1a1411';
+      document.getElementById('work-color-text').value = '#ffffff';
+      document.getElementById('work-color-text-picker').value = '#ffffff';
+      document.getElementById('work-href').value = '';
+      document.getElementById('work-sort-order').value = state.works.length + 1;
+      document.getElementById('work-description').value = '';
+      document.getElementById('work-gallery').value = '';
+      document.getElementById('work-live-url').value = '';
+
+      document.getElementById('work-modal').classList.add('open');
+    }
+
+    function openEditModal(id) {
+      const work = state.works.find(w => w.id === id);
+      if (!work) return;
+
+      document.getElementById('modal-work-title').textContent = `Edit: ${work.title}`;
+      document.getElementById('work-id').value = work.id;
+      document.getElementById('work-title').value = work.title || '';
+      document.getElementById('work-slug').value = work.slug || work.id;
+      document.getElementById('work-tags').value = work.tags || '';
+      document.getElementById('work-image').value = work.image_url || '';
+      document.getElementById('work-depth').value = work.depth_image_url || '';
+      document.getElementById('work-color-bg').value = work.color_bg || '#1a1411';
+      document.getElementById('work-color-bg-picker').value = work.color_bg || '#1a1411';
+      document.getElementById('work-color-text').value = work.color_text || '#ffffff';
+      document.getElementById('work-color-text-picker').value = work.color_text || '#ffffff';
+      document.getElementById('work-href').value = work.href || `/projects/${work.slug || work.id}`;
+      document.getElementById('work-sort-order').value = work.sort_order || 1;
+      document.getElementById('work-description').value = work.description || '';
+
+      let galleryVal = '';
+      if (Array.isArray(work.gallery)) {
+        galleryVal = work.gallery.join('\n');
+      } else if (typeof work.gallery === 'string') {
+        try {
+          const parsed = JSON.parse(work.gallery);
+          if (Array.isArray(parsed)) galleryVal = parsed.join('\n');
+          else galleryVal = work.gallery;
+        } catch (e) {
+          galleryVal = work.gallery;
+        }
+      }
+      document.getElementById('work-gallery').value = galleryVal;
+      document.getElementById('work-live-url').value = work.live_url || '';
+
+      document.getElementById('work-modal').classList.add('open');
+    }
+
+    function closeWorkModal() {
+      document.getElementById('work-modal').classList.remove('open');
+    }
+
+    async function handleSaveWork(e) {
+      e.preventDefault();
+      const id = document.getElementById('work-id').value;
+      const isEdit = !!id;
+
+      const title = document.getElementById('work-title').value.trim();
+      const slug = document.getElementById('work-slug').value.trim() || title.toLowerCase().replace(/[^a-z0-9]+/g, '_');
+      const tags = document.getElementById('work-tags').value.trim();
+      const image_url = document.getElementById('work-image').value.trim();
+      const depth_image_url = document.getElementById('work-depth').value.trim();
+      const color_bg = document.getElementById('work-color-bg').value.trim();
+      const color_text = document.getElementById('work-color-text').value.trim();
+      const href = document.getElementById('work-href').value.trim() || `/projects/${slug}`;
+      const sort_order = parseInt(document.getElementById('work-sort-order').value, 10) || (state.works.length + 1);
+
+      const description = document.getElementById('work-description').value.trim();
+      const galleryRaw = document.getElementById('work-gallery').value.trim();
+      const live_url = document.getElementById('work-live-url').value.trim();
+      const gallery = galleryRaw ? galleryRaw.split(/\r?\n/).map(s => s.trim()).filter(Boolean) : [];
+
+      const payload = {
+        id: isEdit ? id : slug,
+        slug,
+        title,
+        tags,
+        image_url,
+        depth_image_url,
+        color_bg,
+        color_text,
+        color_shadow: 0.95,
+        href,
+        sort_order,
+        description,
+        gallery: gallery.length > 0 ? JSON.stringify(gallery) : '',
+        live_url
+      };
+
+      if (state.isConnected) {
+        try {
+          const cleanUrl = state.supabaseUrl.replace(/\/+$/, '');
+          const endpoint = isEdit ? `${cleanUrl}/rest/v1/works?id=eq.${encodeURIComponent(id)}` : `${cleanUrl}/rest/v1/works`;
+          const method = isEdit ? 'PATCH' : 'POST';
+
+          let res = await fetch(endpoint, {
+            method: method,
+            headers: getHeaders(),
+            body: JSON.stringify(payload)
+          });
+
+          if (!res.ok) {
+            const errText = await res.text();
+            // Fallback if optional columns (description, gallery, live_url) are not yet in Supabase SQL schema
+            if (errText.includes('column') || errText.includes('PGRST204')) {
+              console.warn('Custom columns not yet in Supabase table schema. Retrying core columns:', errText);
+              const corePayload = {
+                id: payload.id,
+                slug: payload.slug,
+                title: payload.title,
+                tags: payload.tags,
+                image_url: payload.image_url,
+                depth_image_url: payload.depth_image_url,
+                color_bg: payload.color_bg,
+                color_text: payload.color_text,
+                color_shadow: payload.color_shadow,
+                href: payload.href,
+                sort_order: payload.sort_order
+              };
+              const retryRes = await fetch(endpoint, {
+                method: method,
+                headers: getHeaders(),
+                body: JSON.stringify(corePayload)
+              });
+              if (!retryRes.ok) throw new Error(await retryRes.text());
+              showToast(`프로젝트 기본 정보가 Supabase에 저장되었고, 상세 내용은 로컬에 완벽 저장되었습니다!`, 'success');
+            } else {
+              throw new Error(errText);
+            }
+          } else {
+            showToast(`프로젝트 및 상세 페이지 내용이 Supabase에 성공적으로 ${isEdit ? '수정' : '생성'}되었습니다!`, 'success');
+          }
+        } catch (err) {
+          console.error(err);
+          showToast(`Supabase 오류: ${err.message}. 로컬에 안전하게 저장되었습니다.`, 'error');
+        }
+      }
+
+      // Update Local State
+      if (isEdit) {
+        const idx = state.works.findIndex(w => w.id === id);
+        if (idx !== -1) state.works[idx] = Object.assign({}, state.works[idx], payload);
+      } else {
+        state.works.push(payload);
+      }
+
+      localStorage.setItem(STORAGE_KEYS.DATA, JSON.stringify(state.works));
+
+      // Save custom detail overrides for instant detail page hydration
+      try {
+        const customStore = JSON.parse(localStorage.getItem('manyeo_custom_details') || '{}');
+        const detailData = {
+          description: payload.description,
+          gallery: payload.gallery,
+          live_url: payload.live_url
+        };
+        customStore[payload.id] = detailData;
+        customStore[payload.slug] = detailData;
+        localStorage.setItem('manyeo_custom_details', JSON.stringify(customStore));
+      } catch (e) {}
+
+      closeWorkModal();
+      applyFilters();
+      renderTable();
+    }
+
+    async function handleDeleteWork(id, title) {
+      if (!confirm(`정말로 "${title || id}" 프로젝트를 삭제하시겠습니까?`)) {
+        return;
+      }
+
+      if (state.isConnected) {
+        try {
+          const cleanUrl = state.supabaseUrl.replace(/\/+$/, '');
+          const res = await fetch(`${cleanUrl}/rest/v1/works?id=eq.${encodeURIComponent(id)}`, {
+            method: 'DELETE',
+            headers: getHeaders()
+          });
+          if (!res.ok) throw new Error(await res.text());
+          showToast(`"${title}" 프로젝트가 Supabase에서 삭제되었습니다.`, 'success');
+        } catch (err) {
+          showToast(`Supabase 삭제 실패: ${err.message}`, 'error');
+        }
+      }
+
+      state.works = state.works.filter(w => w.id !== id);
+      localStorage.setItem(STORAGE_KEYS.DATA, JSON.stringify(state.works));
+      applyFilters();
+      renderTable();
+    }
+
+    // --- Supabase Config Modal Handlers ---
+    function openSupabaseConfigModal() {
+      document.getElementById('cfg-url').value = state.supabaseUrl;
+      document.getElementById('cfg-key').value = state.supabaseKey;
+      document.getElementById('test-result-badge').textContent = '';
+      document.getElementById('supabase-modal').classList.add('open');
+    }
+
+    function closeSupabaseModal() {
+      document.getElementById('supabase-modal').classList.remove('open');
+    }
+
+    async function testCurrentConfig() {
+      const url = document.getElementById('cfg-url').value.trim();
+      const key = document.getElementById('cfg-key').value.trim();
+      const badge = document.getElementById('test-result-badge');
+
+      badge.textContent = 'Testing...';
+      badge.style.color = 'var(--text-muted)';
+
+      const res = await testConnection(url, key);
+      if (res.ok) {
+        badge.textContent = `✓ Connected (${res.latency}ms)`;
+        badge.style.color = 'var(--accent-lime)';
+      } else {
+        badge.textContent = `✗ Failed: ${res.message || 'Error'}`;
+        badge.style.color = 'var(--danger)';
+      }
+    }
+
+    async function handleSaveSupabase(e) {
+      e.preventDefault();
+      const url = document.getElementById('cfg-url').value.trim();
+      const key = document.getElementById('cfg-key').value.trim();
+
+      state.supabaseUrl = url;
+      state.supabaseKey = key;
+      localStorage.setItem(STORAGE_KEYS.URL, url);
+      localStorage.setItem(STORAGE_KEYS.KEY, key);
+
+      closeSupabaseModal();
+      showToast('Supabase API 설정이 저장되었습니다.', 'success');
+      loadWorks();
+    }
+
+    async function syncAllToSupabase() {
+      if (!state.supabaseUrl || !state.supabaseKey) {
+        showToast('먼저 Supabase 설정(URL 및 Key)을 입력해주세요.', 'error');
+        openSupabaseConfigModal();
+        return;
+      }
+
+      if (!confirm(`현재 로컬의 ${state.works.length}개 프로젝트를 Supabase "works" 테이블로 동기화(Upsert)하시겠습니까?`)) {
+        return;
+      }
+
+      try {
+        const cleanUrl = state.supabaseUrl.replace(/\/+$/, '');
+        const res = await fetch(`${cleanUrl}/rest/v1/works`, {
+          method: 'POST',
+          headers: Object.assign({}, getHeaders(), {
+            Prefer: 'resolution=merge-duplicates'
+          }),
+          body: JSON.stringify(state.works)
+        });
+
+        if (!res.ok) throw new Error(await res.text());
+        showToast(`성공: ${state.works.length}개의 프로젝트가 Supabase에 동기화되었습니다!`, 'success');
+        loadWorks();
+      } catch (err) {
+        showToast(`동기화 실패: ${err.message}`, 'error');
+      }
+    }
+
+    // Auto-init on load
+    document.addEventListener('DOMContentLoaded', loadWorks);
+  </script>
+</body>
+</html>

@@ -1,0 +1,11 @@
+const fs = require('fs');
+const file = process.env.LOCALAPPDATA + '/Google/Chrome/User Data/Default/Local Extension Settings/flclmdooeejicfjkkigfeenfedkolfda/000040.log';
+const str = fs.readFileSync(file, 'utf8');
+const target = 'works페이지에 스크롤 다 내리면 나오는 이 아래 푸터 부분 필요 없으니 삭제';
+const idx = str.indexOf(target);
+const key = '"thumbnailDataUrl":"data:image/png;base64,';
+const start = str.indexOf(key, idx) + key.length;
+const end = str.indexOf('"', start);
+const b64 = str.slice(start, end);
+fs.writeFileSync('C:/Users/blues/OneDrive/Desktop/Website_work/Manyeo_studio/yoink_thumbnail.png', Buffer.from(b64, 'base64'));
+console.log('Saved Manyeo_studio/yoink_thumbnail.png');
