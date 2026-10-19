@@ -326,12 +326,11 @@ document.addEventListener('DOMContentLoaded', () => {
     modalSectorSnap.querySelectorAll('video').forEach(v => v.pause());
   }
 
+  // Sector thumbnails under View Our Work: unclickable per user request
   document.querySelectorAll('[data-modal-id="sector-snap"]').forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.preventDefault();
-      const sectorPosts = btn.closest('[data-sector-posts]');
-      const sectorIdx = sectorPosts ? sectorPosts.getAttribute('data-sector-posts') : '0';
-      openSectorModal(sectorIdx);
+      e.stopPropagation();
     });
   });
 
@@ -544,6 +543,7 @@ document.addEventListener('DOMContentLoaded', () => {
       // Reset any manual inline styles from scroll fade
       sectionTitle.style.removeProperty('opacity');
       sectionTitle.style.removeProperty('--title-scroll-opacity');
+      sectionTitle.style.removeProperty('clip-path');
       sectionTitle.style.transform = '';
       sectionTitle.style.filter = '';
       sectionTitle.style.letterSpacing = '';

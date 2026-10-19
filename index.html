@@ -371,6 +371,15 @@
     user-select: none;
   }
 
+  /* Disable clicks on bottom thumbnail screens across all video sessions */
+  [data-sector-thumbs] button {
+    pointer-events: none !important;
+    cursor: default !important;
+  }
+  [data-sector-runway] {
+    pointer-events: none !important;
+  }
+
   /* 1. Video 1 (Logo, index 4): Tracking Contraction */
   @keyframes editorialTrackContraction {
     0% {
@@ -390,20 +399,18 @@
     animation: editorialTrackContraction 0.95s var(--ease-editorial) forwards !important;
   }
 
-  /* 2. Video 2 (UX&UI Design, index 2): Vertical Masked Reveal */
+  /* 2. Video 2 (UX&UI Design / Digital, index 2): Vertical Reveal without text clipping */
   @keyframes editorialMaskedReveal {
     0% {
       opacity: 0;
       transform: translateY(24px);
       filter: blur(5px);
-      clip-path: inset(0 0 70% 0);
       letter-spacing: 0.08em;
     }
     100% {
       opacity: 1;
       transform: translateY(0);
       filter: blur(0px);
-      clip-path: inset(0 0 0% 0);
       letter-spacing: 0.01em;
     }
   }
