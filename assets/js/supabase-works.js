@@ -2,7 +2,7 @@
  * Manyeo Studio - Supabase Works Live Integration
  * Synchronizes works in real-time from Supabase (kxlmdxvmcicbgengytoo).
  * Full CRUD is managed securely via the Supabase Dashboard.
- * Frontend is 100% clean, visitor-safe, with zero exposed admin buttons.
+ * Automatically connects to 3D WebGL engine for seamless card interactions.
  */
 
 (function () {
@@ -98,7 +98,10 @@
       }
     });
 
-    // 2. Update existing works or append new ones in correct sort_order
+    let hasNewCards = false;
+
+    // 2. Update existing works in-place (DO NOT MOVE EXISTING CARDS TO PRESERVE 3D COORDINATES)
+    //    and append only genuinely new cards
     works.forEach(item => {
       const id = item.id || item.slug;
       const href = item.href || ('/projects/' + (item.slug || id));
@@ -112,7 +115,7 @@
       let el = container.querySelector(`.project-item[data-id="${id}"]`);
 
       if (el) {
-        // Update attributes in-place to preserve 3D WebGL event listeners
+        // Update attributes in-place without moving DOM nodes
         el.setAttribute('href', href);
         el.setAttribute('data-color-bg', bg);
         el.setAttribute('data-color-text', text);
@@ -135,10 +138,9 @@
         if (line2Inner && !line2Inner.querySelector('.project-item-line-2-inner-list') && line2Inner.textContent !== title) {
           line2Inner.textContent = title;
         }
-
-        container.appendChild(el);
       } else {
-        // Create new project card
+        // Create new project card and append
+        hasNewCards = true;
         el = document.createElement('a');
         el.className = 'project-item project-type-website';
         el.setAttribute('href', href);
@@ -164,9 +166,23 @@
         container.appendChild(el);
       }
     });
+
+    // 3. Connect newly added cards to the 3D WebGL engine
+    if (hasNewCards && window.__manyeoProjectItemList && typeof window.__manyeoProjectItemList.syncFromDOM === 'function') {
+      window.__manyeoProjectItemList.syncFromDOM();
+    }
   }
 
   async function init() {
+    // 1. Instant sync from local cache if available for immediate render
+    try {
+      const cached = localStorage.getItem(CACHE_KEY);
+      if (cached) {
+        syncWorksToDOM(JSON.parse(cached));
+      }
+    } catch (_) {}
+
+    // 2. Fetch live works from Supabase and sync
     const works = await fetchWorksFromSupabase();
     if (works) {
       syncWorksToDOM(works);
