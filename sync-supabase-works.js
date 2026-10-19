@@ -44,7 +44,7 @@ async function downloadFile(url, destPath) {
 }
 
 async function fetchSupabaseWorks() {
-  const url = `${SUPABASE_URL}/rest/v1/works?select=*&order=sort_order.asc`;
+  const url = `${SUPABASE_URL}/rest/v1/works?select=*&order=sort_order.asc.nullslast`;
   console.log(`[Sync] Fetching works from: ${url}`);
   const res = await fetch(url, {
     headers: {
@@ -77,7 +77,13 @@ async function sync() {
       const id = String(item.id || item.slug || `work_${i + 1}`).trim();
       const title = item.title || 'Untitled';
       const tags = item.tags || 'web • design • development • 3d';
-      const href = item.href || `/projects/${item.slug || id}`;
+
+      // Ensure href always points to a valid project route so SPA router never redirects to home
+      let href = item.href ? String(item.href).trim() : '';
+      if (!href || !href.startsWith('/')) {
+        href = `/projects/${item.slug || id}`;
+      }
+
       const colorBg = item.color_bg || '#181818';
       const colorText = item.color_text || '#ffffff';
       const colorShadow = item.color_shadow !== undefined ? item.color_shadow : 0.95;

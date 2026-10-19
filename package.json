@@ -1,9 +1,0 @@
-{
-  "name": "manyeo-studio",
-  "version": "1.0.0",
-  "private": true,
-  "scripts": {
-    "build": "node sync-supabase-works.js",
-    "sync": "node sync-supabase-works.js"
-  }
-}
