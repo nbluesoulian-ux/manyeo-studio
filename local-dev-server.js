@@ -65,7 +65,6 @@ const server = http.createServer((req, res) => {
   if (reqPath === '/') reqPath = '/index.html';
   if (reqPath === '/work' || reqPath === '/work/') reqPath = '/work/index.html';
   if (reqPath === '/projects' || reqPath === '/projects/') reqPath = '/work/index.html';
-  if (reqPath === '/admin' || reqPath === '/admin/') reqPath = '/admin.html';
 
   // Handle Vercel serverless function /api/config locally
   if (reqPath === '/api/config') {
